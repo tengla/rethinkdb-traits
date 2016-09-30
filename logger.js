@@ -1,5 +1,6 @@
 'use strict';
 
+
 const Logger = function () {
 
     this.startTime = Date.now();
@@ -8,7 +9,9 @@ const Logger = function () {
 const padEnd = function (s,n) {
 
     const p = n - s.length;
-    if (p < 1) return s;
+    if (p < 1) {
+        return s;
+    }
     const padStr = new Array(p).fill(0).map( i => " ").join('');
     return s.concat(padStr);
 };
@@ -20,7 +23,7 @@ Logger.prototype.log = function (s,level) {
     }
 
     const elapsed = padEnd( (Date.now() - this.startTime).toString(), 7);
-
+    /* $lab:coverage:off$ */
     if ( ! level ) {
         console.log(`${elapsed}: '${s}'`);
     }
