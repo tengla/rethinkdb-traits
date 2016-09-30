@@ -5,22 +5,10 @@ const _uniq = require('lodash/uniq');
 const BaseModel = require('./BaseModel');
 const ensureTable = require('./ensuretable');
 const ensureIndex = require('./ensureindex');
+const arrayPrepend = require('./arrayprepend');
 const logger = require('./logger').create();
 
-const ensuredTableSet = {
-    ary: [],
-    has: function (name) {
-
-        return this.ary.includes(name);
-    },
-    add: function (name) {
-
-        if ( ! this.ary.includes(name) ) {
-            this.ary.push(name);
-        }
-        return this.ary;
-    }
-};
+const ensuredTableSet = new Set([]);
 
 const analyseChain = function (chain) {
 
@@ -105,7 +93,7 @@ const _create = function (conn,tableName,definition) {
             }
             
             // prepend query to make it the first param
-            const args = prependToArguments([query], arguments);
+            const args = arrayPrepend([query], arguments);
 
             // lookup function
             const fn = (this.traits[name] || this.base[name]);
@@ -173,14 +161,6 @@ const create = function (conn) {
             return _create(conn,tableName,definition);
         });
     };
-};
-
-const prependToArguments = function (preargs,args) {
-
-    return Array.prototype.concat.call(
-        preargs,
-        Array.prototype.slice.call(args)
-    );
 };
 
 module.exports = function (config) {
