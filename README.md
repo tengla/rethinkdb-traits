@@ -54,6 +54,7 @@ Traits.create('rappers', {
 }).then(function (Rapper) {
 
     // We receive a table wrapper for 'rappers'
+    // Pun not intended.
     Rapper.create([{
         name: 'Tupac'
     },{
