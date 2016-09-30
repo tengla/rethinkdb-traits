@@ -61,8 +61,11 @@ Traits.create('rappers', {
         name: 'Biggie Smalls'
     }], { returnChanges: false }).then( (ids) => {
 
-        console.log(ids); // This was transformed to generated ids after 'create', remember?
-        return Rapper.getBiggie(); // Call function defined in 'traits'.
+        // This was transformed from 'generated_keys' after 'create', remember?
+        console.log(ids);
+
+        // Call function defined in 'traits'.
+        return Rapper.getBiggie();
     }).then( (rapper) => {
 
         console.assert(rapper.name === 'Biggie Smalls');
