@@ -1,6 +1,11 @@
 # rethinkdb-traits
 A (tiny) framework to compose rethinkdb queries.
 
+## To install
+```shell
+npm i -S athlite/rethinkdb-traits
+```
+
 ## The deal
 
 ```javascript
