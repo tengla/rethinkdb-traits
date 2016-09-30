@@ -1,6 +1,5 @@
 'use strict';
 
-const r = require('rethinkdb');
 Promise = require('bluebird');
 
 const BaseModel = function () {};
@@ -12,17 +11,13 @@ BaseModel.prototype = Object.create(Object.prototype, {
         value: function (query) {
 
             return query;
-        },
+        }
     },
 
     create: {
         enumerable: true,
-        value: function(query,object,options) {
-
-            const _object = Object.assign(object, {
-                createdAt: r.now()
-            });
-            return query.insert(_object,options||{ returnChanges: true });
+        value: function (query,object,options = { returnChanges: true }) {
+            return query.insert(object,options);
         }
     },
 
