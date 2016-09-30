@@ -18,6 +18,8 @@ Traits.create('rappers', {
     traits: {
         getBiggie: function (rql) {
 
+            // Trivially return, the interesting part getsdone in 'before' and 'after',
+            // just to make an example.
             return rql;
         }
     },
@@ -27,6 +29,20 @@ Traits.create('rappers', {
             function (rql) {
 
                 return rql.getAll('Biggie Smalls', { index: 'name' });
+            }
+        ]
+    },
+    after: {
+        'create': [
+            function (rql) {
+
+                return rql('generated_keys');
+            }
+        ],
+        'getBiggie': [
+            function (rql) {
+
+                return rql.coerceTo('array')(0);
             }
         ]
     }
@@ -42,14 +58,14 @@ Traits.create('rappers', {
         name: 'Tupac'
     },{
         name: 'Biggie Smalls'
-    }]).then( (rappers) => {
+    }], { returnChanges: false }).then( (ids) => {
 
-        console.log(JSON.stringify(rappers,null,4));
-        return Rapper.getBiggie();
+        console.log(ids); // This was transformed to generated ids after 'create', remember?
+        return Rapper.getBiggie(); // Call function defined in 'traits'.
     }).then( (rapper) => {
 
         console.assert(rapper.name === 'Biggie Smalls');
         Traits.close();
-    })
+    });
 })
 ```
