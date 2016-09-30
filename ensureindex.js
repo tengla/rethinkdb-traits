@@ -1,5 +1,6 @@
 
 const r = require('rethinkdb');
+Promise = require('bluebird');
 const logger = require('./logger').create();
 
 const ensureIndex = (conn,tableName) => (indexName,options) => {
@@ -16,9 +17,7 @@ const ensureIndex = (conn,tableName) => (indexName,options) => {
             logger.log(`Index '${indexName}' already exists`);
             return Promise.resolve(`Index '${indexName}' already exists`);
         }
-
         logger.log(`Creating index '${indexName}' on '${tableName}'`);
-
         return r.table(tableName)
             .indexCreate(indexName, options||{})
             .run(conn)
@@ -32,5 +31,4 @@ const ensureIndex = (conn,tableName) => (indexName,options) => {
         console.error(err);
     });
 };
-
 module.exports = ensureIndex;
