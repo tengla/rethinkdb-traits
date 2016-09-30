@@ -1,4 +1,5 @@
-    
+
+const r = require('rethinkdb');
 const Lab = require('lab');
 const Code = require('code');
 const lab = exports.lab = Lab.script();
@@ -23,8 +24,15 @@ lab.before( (done) => {
                 return query;
             },
             create: function (query,objects,options = { returnChanges: true }) {
-                const _objects = objects.map( o => Object.assign({}, o, { createdAt: new Date() }) )
-                return query.insert(_objects,options);
+
+                if( typeof objects.map === 'function') {
+                    const _objects = objects.map( o => Object.assign({}, o, { createdAt: new Date() }) )
+                    return query.insert(_objects,options);
+                }
+                else {
+                    const _object = Object.assign({}, objects, { createdAt: new Date() });
+                    return query.insert(_object,options);
+                }
             }
         },
         before: {
@@ -53,7 +61,8 @@ lab.before( (done) => {
         }
     },{
         indexes: {
-            name: {} // no options needed, because it's just a plain string
+            name: {},
+            location: { geo: true }
         }
     }).then( (_Rapper) => {
         Rapper = _Rapper;
@@ -76,12 +85,11 @@ lab.experiment('Traits', () => {
         Rapper.create([{
             name: 'Biggie Smalls'
         },{
-            name: 'Big Pun'
+            name: 'Tupac'
         },{
             name: 'Grand Master Flash'
         }]).then( (result) => {
 
-            expect(result[0].createdAt).to.be.date();
             expect(result.length).to.equal(3);
             done();
         }).catch(done);
@@ -92,7 +100,7 @@ lab.experiment('Traits', () => {
         Rapper.create([{
             name: 'Biggie Smalls'
         },{
-            name: 'Big Pun'
+            name: 'Tupac'
         },{
             name: 'Grand Master Flash'
         }]).then( () => {
@@ -105,4 +113,17 @@ lab.experiment('Traits', () => {
             done();
         }).catch(done);
     });
+
+    it('should merge createdAt to rapper', (done) => {
+
+        Rapper.create({
+            name: 'Biggie Smalls',
+            location: r.point(0,0)
+        }).then( (rappers) => {
+
+            const [ rapper ] = rappers;
+            expect(rapper.createdAt).to.be.date();
+            done();
+        });
+    })
 });
