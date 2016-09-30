@@ -1,0 +1,30 @@
+{
+  "name": "rethinkdb-traits",
+  "version": "0.0.1",
+  "description": "A RethinkDB query composer.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/athlite/rethinkdb-traits"
+  },
+  "keywords": [
+    "Rethinkdb",
+    "Query",
+    "Db",
+    "Composer"
+  ],
+  "author": "Thomas T. Eng",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "lodash": "^4.16.2",
+    "rethinkdb": "^2.3.3"
+  },
+  "devDependencies": {
+    "code": "^4.0.0",
+    "lab": "^11.1.0"
+  }
+}
