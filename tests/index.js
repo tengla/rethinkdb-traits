@@ -32,6 +32,12 @@ lab.before( (done) => {
             ]
         },
         after: {
+            'create': [
+                function (query) {
+
+                    return query('generated_keys');
+                }
+            ],
             'getBiggie': [
                 function afterGetBiggie (query) {
 
@@ -41,7 +47,7 @@ lab.before( (done) => {
         }
     },{
         indexes: {
-            name: {} // no options, just a plain string
+            name: {} // no options needed, because it's just a plain string
         }
     }).then( (_Rapper) => {
         Rapper = _Rapper;
@@ -69,7 +75,7 @@ lab.experiment('Traits', () => {
             name: 'Grand Master Flash'
         }]).then( (result) => {
 
-            expect(result.generated_keys.length).to.equal(3);
+            expect(result.length).to.equal(3);
             done();
         });
     });
@@ -83,6 +89,7 @@ lab.experiment('Traits', () => {
         },{
             name: 'Grand Master Flash'
         }]).then( () => {
+
             return Rapper.getBiggie();
         }).then( (rappers) => {
 
