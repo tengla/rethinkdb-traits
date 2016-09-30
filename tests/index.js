@@ -12,7 +12,7 @@ const Traits = require('../index')({
     password: process.env.TRAITS_PASSWORD
 });
 
-let Rapper; // blargh!*?
+let Rapper;
 
 lab.before( (done) => {
 
@@ -21,6 +21,10 @@ lab.before( (done) => {
             getBiggie: function (query) {
 
                 return query;
+            },
+            create: function (query,objects,options = { returnChanges: true }) {
+                const _objects = objects.map( o => Object.assign({}, o, { createdAt: new Date() }) )
+                return query.insert(_objects,options);
             }
         },
         before: {
@@ -35,7 +39,9 @@ lab.before( (done) => {
             'create': [
                 function (query) {
 
-                    return query('generated_keys');
+                    return query('changes').map(function(doc) {
+                        return doc('new_val');
+                    });
                 }
             ],
             'getBiggie': [
@@ -75,9 +81,10 @@ lab.experiment('Traits', () => {
             name: 'Grand Master Flash'
         }]).then( (result) => {
 
+            expect(result[0].createdAt).to.be.date();
             expect(result.length).to.equal(3);
             done();
-        });
+        }).catch(done);
     });
 
     it('should get Biggie Smalls', (done) => {
