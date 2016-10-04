@@ -1,6 +1,5 @@
 'use strict';
 
-const assignToSlate = require('./assigntoslate');
 const interceptor = require('./interceptor');
 const analyzechain = require('./analyzechain');
 const ensuretable = require('./ensuretable');
