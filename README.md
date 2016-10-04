@@ -5,6 +5,7 @@ A (tiny) framework to compose rethinkdb queries.
 ```shell
 npm i -S athlite/rethinkdb-traits
 ```
+*currently only available from github*
 
 ## The deal
 
@@ -18,8 +19,8 @@ const Traits = require('rethinkdb-traits')({
 });
 
 // table 'rappers' gets created if not present,
-// as does indexes 
-Traits.create('rappers', {
+// as does indexes
+const Rapper = {
     traits: {
         getBiggie: function (rql) {
 
@@ -51,20 +52,23 @@ Traits.create('rappers', {
             }
         ]
     }
-},{
-    indexes: {
-        name: {},
-        location: { geo: true }
-    }
-}).then(function (Rapper) {
+};
 
-    // We receive a table wrapper for 'rappers'
-    // Pun not intended.
-    Rapper.create([{
+const indexes = {
+    name: {},
+    location: { geo: true }
+};
+
+Traits.create('rappers', Rapper, { indexes })
+.then(function (Rapper) {
+
+    return Rapper.create([{
         name: 'Tupac'
     },{
         name: 'Biggie Smalls'
-    }], { returnChanges: false }).then( (ids) => {
+    }],{
+        returnChanges: false
+    }).then( (ids) => {
 
         // This was transformed from 'generated_keys' after 'create', remember?
         console.log(ids);
@@ -78,3 +82,4 @@ Traits.create('rappers', {
     });
 })
 ```
+More examples in the [wiki](https://github.com/athlite/rethinkdb-traits/wiki)
