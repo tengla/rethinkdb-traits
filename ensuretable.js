@@ -1,7 +1,7 @@
 
 const r = require('rethinkdb');
 Promise = require('bluebird');
-const logger = require('./logger').create();
+const log = require('./logger').singleton();
 
 const ensureTable = conn => tableName => {
 
@@ -10,11 +10,11 @@ const ensureTable = conn => tableName => {
 
         if ( ! list.includes(tableName) ) {
 
-            logger.log(`Creating table '${tableName}'`);
+            log(`Creating table '${tableName}'`);
             return r.tableCreate(tableName).run(conn).then( result => result );
         } else {
 
-            logger.log(`Table '${tableName}' exists`);
+            log(`Table '${tableName}' exists`);
             return Promise.resolve(`${tableName} already exists`);
         }
     });
