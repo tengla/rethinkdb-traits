@@ -1,5 +1,6 @@
 'use strict';
 
+const VERBOSITY = Number(process.env.VERBOSITY);
 
 const Logger = function () {
 
@@ -16,18 +17,15 @@ const padEnd = function (s,n) {
     return s.concat(padStr);
 };
 
-Logger.prototype.log = function (s,level) {
+Logger.prototype.log = function (s) {
 
     if ( ! process.env.VERBOSITY ) {
         return;
     }
 
     const elapsed = padEnd( (Date.now() - this.startTime).toString(), 7);
-    /* $lab:coverage:off$ */
-    if ( ! level ) {
-        console.log(`${elapsed}: '${s}'`);
-    }
-    else if (level == process.env.VERBOSITY) {
+
+    if (VERBOSITY) {
         console.log(`${elapsed}: '${s}'`);
     }
 };
@@ -35,8 +33,9 @@ Logger.prototype.log = function (s,level) {
 let logger;
 
 module.exports = {
-    create: function () {
-        return logger = logger || new Logger();
+    singleton: function () {
+        logger = logger || new Logger();
+        return logger.log.bind(logger);
     },
     Logger: Logger
 };
