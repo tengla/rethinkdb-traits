@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "code": "^4.0.0",
+    "faker": "^3.1.0",
     "lab": "^11.1.0"
   }
 }
