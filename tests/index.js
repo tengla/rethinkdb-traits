@@ -6,7 +6,7 @@ const lab = exports.lab = Lab.script();
 const it = lab.it;
 const expect = Code.expect;
 
-const Traits = require('../index')({
+const Traits = require('../index').connect({
     db: process.env.TRAITS_DB,
     host: process.env.TRAITS_HOST,
     user: process.env.TRAITS_USER,
