@@ -55,9 +55,9 @@ module.exports = function (config) {
 
         create: {
             enumerable: true,
-            value: function (rql,object){
+            value: function (rql,object,options={}){
 
-                return rql.insert(object);
+                return rql.insert(object,options);
             }
         },
         
