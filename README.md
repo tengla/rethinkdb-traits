@@ -10,76 +10,96 @@ npm i -S athlite/rethinkdb-traits
 ## The deal
 
 ```javascript
-// pass db options
-const Traits = require('rethinkdb-traits')({
+
+const r = require('rethinkdb');
+const Traits = require('rethinkdb-traits');
+
+const Base = Traits.config({
     db: 'test',
-    host: 'localhost',
     user: 'test',
     password: ''
 });
 
-// table 'rappers' gets created if not present,
-// as does indexes
-const Rapper = {
-    traits: {
-        getBiggie: function (rql) {
+// Traits.modelCreateFrom is a curry
+const modelCreate = Traits.modelCreateFrom(Base);
 
-            // Trivially return, the interesting part getsdone in 'before' and 'after',
-            // just to make an example.
-            return rql;
-        }
-    },
-    before: {
-        'getBiggie': [
-            // functions get called in the order of appearance
-            function (rql) {
+// traits for model 'person'
+const personTraits = {
+    withGroup: function (rql) {
 
-                return rql.getAll('Biggie Smalls', { index: 'name' });
-            }
-        ]
+        return rql.eqJoin('groupId', r.table('groups')).map(function (doc) {
+            return doc('left').merge({
+                group: doc('right')
+            }).without('groupId')
+        }).coerceTo('array');
+    }
+};
+
+// traits for model 'group'
+const groupTraits = {
+    withPeople: function (rql) {
+
+        return rql.merge(function(group) {
+
+            return group.merge({
+                people: r.table('people').getAll(group('id'), { index: 'groupId' }).coerceTo('array')
+            });
+        })
     },
     after: {
-        'create': [
+        withPeople: [
             function (rql) {
 
-                return rql('generated_keys');
-            }
-        ],
-        'getBiggie': [
-            function (rql) {
-
-                return rql.coerceTo('array')(0);
+                return rql.coerceTo('array');
             }
         ]
     }
 };
 
-const indexes = {
-    name: {},
-    location: { geo: true }
-};
+// modelCreate returns promise, so wrap 'em up
+const promises = [
+    modelCreate('people', personTraits, {
+        name: {}, // index
+        groupId: {} // index
+    }),
+    modelCreate('groups', groupTraits)
+];
 
-Traits.create('rappers', Rapper, { indexes })
-.then(function (Rapper) {
+// run the lot
+Promise.all(promises).then( (result) => {
 
-    return Rapper.create([{
-        name: 'Tupac'
+    const [ Person, Group ] = result;
+
+    Group.create([{
+        name: 'Biggies group'
     },{
-        name: 'Biggie Smalls'
-    }],{
-        returnChanges: false
-    }).then( (ids) => {
+        name: 'Tupacs group'
+    }]).then( (res) => {
 
-        // This was transformed from 'generated_keys' after 'create', remember?
-        console.log(ids);
+        return Person.create([{
+            name: 'Biggie Smalles',
+            groupId: res.generated_keys[0]
+        },{
+           name: 'Faith Evans',
+            groupId: res.generated_keys[0] 
+        },{
+            name: 'Tupac Shakur',
+            groupId: res.generated_keys[1]
+        },{
+            name: 'Mama',
+            groupId: res.generated_keys[1]
+        }]);
+    }).then( () => {
 
-        // Call function defined in 'traits'.
-        return Rapper.getBiggie();
-    }).then( (rapper) => {
+        return Group.withPeople();
+    }).then( (groups) => {
 
-        console.assert(rapper.name === 'Biggie Smalls');
-        Traits.close();
+        logJson(groups);
+        return Promise.all([Person.delete(),Group.delete()]);
+    }).then( () => {
+
+        Base.close();
     });
-})
+});
 ```
 More examples in the [wiki](https://github.com/athlite/rethinkdb-traits/wiki)
