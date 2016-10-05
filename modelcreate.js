@@ -33,6 +33,7 @@ const modelcreate = function (base, tableName, source, indexes={}) {
         if ( Object.getOwnPropertyDescriptor(base,key).enumerable ) {
             Object.defineProperty(slate,key,{
                 enumerable: true,
+                writable: true,
                 value: interceptor.bind(slate,key,base[key],tableName)
             });
         }
