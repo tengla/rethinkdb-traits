@@ -5,34 +5,35 @@ const Code = require('code');
 const lab = exports.lab = Lab.script();
 const it = lab.it;
 const expect = Code.expect;
+const Traits = require('../');
 
-const Traits = require('../index').connect({
+const Base = Traits.config({
     db: process.env.TRAITS_DB,
     host: process.env.TRAITS_HOST,
     user: process.env.TRAITS_USER,
     password: process.env.TRAITS_PASSWORD
 });
 
+const modelCreate = Traits.modelCreateFrom(Base);
+
 let Rapper;
 
 lab.before( (done) => {
 
-    Traits.create('_rappers', {
-        traits: {
-            getBiggie: function (query) {
+    modelCreate('_rappers', {
+        getBiggie: function (query) {
 
-                return query;
-            },
-            create: function (query,objects,options = { returnChanges: true }) {
+            return query;
+        },
+        create: function (query,objects,options = { returnChanges: true }) {
 
-                if( typeof objects.map === 'function') {
-                    const _objects = objects.map( o => Object.assign({}, o, { createdAt: new Date() }) )
-                    return query.insert(_objects,options);
-                }
-                else {
-                    const _object = Object.assign({}, objects, { createdAt: new Date() });
-                    return query.insert(_object,options);
-                }
+            if( typeof objects.map === 'function') {
+                const _objects = objects.map( o => Object.assign({}, o, { createdAt: new Date() }) )
+                return query.insert(_objects,options);
+            }
+            else {
+                const _object = Object.assign({}, objects, { createdAt: new Date() });
+                return query.insert(_object,options);
             }
         },
         before: {
@@ -60,10 +61,9 @@ lab.before( (done) => {
             ]
         }
     },{
-        indexes: {
-            name: {},
-            location: { geo: true }
-        }
+        
+        name: {},
+        location: { geo: true }
     }).then( (_Rapper) => {
         Rapper = _Rapper;
         done();
