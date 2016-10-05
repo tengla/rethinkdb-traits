@@ -102,4 +102,42 @@ Promise.all(promises).then( (result) => {
     });
 });
 ```
+Should return:
+```json
+[
+    {
+        "id": "f670cfe1-72d4-4567-9728-f242a18bdca7",
+        "name": "Biggies group",
+        "people": [
+            {
+                "groupId": "f670cfe1-72d4-4567-9728-f242a18bdca7",
+                "id": "cb623871-b115-4da7-b3ff-193169795345",
+                "name": "Faith Evans"
+            },
+            {
+                "groupId": "f670cfe1-72d4-4567-9728-f242a18bdca7",
+                "id": "f6b27765-f5ec-41e2-8f92-b0e9939ffb77",
+                "name": "Biggie Smalles"
+            }
+        ]
+    },
+    {
+        "id": "fb53dc48-b7f2-4dcc-beae-a35c70cd210e",
+        "name": "Tupacs group",
+        "people": [
+            {
+                "groupId": "fb53dc48-b7f2-4dcc-beae-a35c70cd210e",
+                "id": "43746012-de73-4f73-a60e-16d1f7369e8d",
+                "name": "Mama"
+            },
+            {
+                "groupId": "fb53dc48-b7f2-4dcc-beae-a35c70cd210e",
+                "id": "efb34795-5148-4b39-ac4d-533a206a5138",
+                "name": "Tupac Shakur"
+            }
+        ]
+    }
+]
+```
+
 More examples in the [wiki](https://github.com/athlite/rethinkdb-traits/wiki)
