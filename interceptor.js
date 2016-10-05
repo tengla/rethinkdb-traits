@@ -15,7 +15,7 @@ module.exports = function () {
     if ( this.before[functionName] && this.before[functionName].hasOwnProperty('length') ) {
 
         const functions = this.before[functionName];
-        log(`call before on "${functionName}" on "${tableName}"`);
+        log(`call before function "${functionName}" on table "${tableName}"`);
 
         for (const fn of functions) {
             query = fn.apply(this,[query].concat(params));
@@ -28,7 +28,7 @@ module.exports = function () {
     if ( this.after[functionName] && this.after[functionName].hasOwnProperty('length') ) {
 
         const functions = this.after[functionName];
-        log(`call after on "${functionName}" on "${tableName}"`);
+        log(`call after function "${functionName}" on table "${tableName}"`);
 
         for (const fn of functions) {
             query = fn.apply(this,[query].concat(params));
