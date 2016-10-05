@@ -1,5 +1,5 @@
 # rethinkdb-traits
-A (tiny) framework to compose rethinkdb queries.
+A (tiny) framework to compose rethinkdb queries with node.js
 
 ## To install
 ```shell
