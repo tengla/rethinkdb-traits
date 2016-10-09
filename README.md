@@ -1,5 +1,7 @@
 # rethinkdb-traits
-A (tiny) framework to compose rethinkdb queries with node.js
+A library to compose rethinkdb queries with NodeJS
+
+This is not an ORM. It's a library to organise related queries around tables. It does not assume anything about relations, but rather let's you express relations yourself, through functions.
 
 ## To install
 ```shell
@@ -14,13 +16,14 @@ npm i -S athlite/rethinkdb-traits
 const r = require('rethinkdb');
 const Traits = require('rethinkdb-traits');
 
+// Connect
 const Base = Traits.config({
     db: 'test',
     user: 'test',
     password: ''
 });
 
-// Traits.modelCreateFrom is a curry
+// Traits.modelCreateFrom is a curry that returns a function for reuse.
 const modelCreate = Traits.modelCreateFrom(Base);
 
 // traits for model 'person'
