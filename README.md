@@ -26,18 +26,6 @@ const Base = Traits.config({
 // Traits.modelCreateFrom is a curry that returns a function for reuse.
 const modelCreate = Traits.modelCreateFrom(Base);
 
-// traits for model 'person'
-const personTraits = {
-    withGroup: function (rql) {
-
-        return rql.eqJoin('groupId', r.table('groups')).map(function (doc) {
-            return doc('left').merge({
-                group: doc('right')
-            }).without('groupId')
-        }).coerceTo('array');
-    }
-};
-
 // traits for model 'group'
 const groupTraits = {
     withPeople: function (rql) {
@@ -45,7 +33,7 @@ const groupTraits = {
         return rql.merge(function(group) {
 
             return group.merge({
-                people: r.table('people').getAll(group('id'), { index: 'groupId' }).coerceTo('array')
+                people: r.table('people').getAll(group('id'), { index: 'groupId' });
             });
         })
     },
@@ -61,7 +49,7 @@ const groupTraits = {
 
 // modelCreate returns promise, so wrap 'em up
 const promises = [
-    modelCreate('people', personTraits, {
+    modelCreate('people', {} , {
         name: {}, // index
         groupId: {} // index
     }),
