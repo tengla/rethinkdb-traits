@@ -1,16 +1,16 @@
 'use strict';
 
-const interceptor = require('./interceptor');
-const analyzechain = require('./analyzechain');
-const ensuretable = require('./ensuretable');
-const ensureindex = require('./ensureindex');
+const Interceptor = require('./interceptor');
+const Analyzechain = require('./analyzechain');
+const Ensuretable = require('./ensuretable');
+const Ensureindex = require('./ensureindex');
 const log = require('./logger').singleton();
-
+const Path = require('path');
 const knownTables = new Set();
 
-const modelcreate = function (base, tableName, source, indexes={}) {
+const modelcreate = function (base, tableName, source, indexes = {}) {
 
-    let slate = {};
+    const slate = {};
 
     Object.defineProperties(slate, {
         tableName: {
@@ -18,30 +18,42 @@ const modelcreate = function (base, tableName, source, indexes={}) {
         },
         before: {
             writable: true,
-            value: analyzechain(source.before || {})
+            value: Analyzechain(source.before || {})
         },
         after: {
             writable: true,
-            value: analyzechain(source.after || {})
+            value: Analyzechain(source.after || {})
         }
     });
 
     // first inherit functions from base
     for (const key of Object.getOwnPropertyNames(base)) {
-    
+
+        log(`${Path.basename(__filename)}: Set ${key} on ${tableName}`);
         // this is marked for interception
         if ( Object.getOwnPropertyDescriptor(base,key).enumerable ) {
+
             Object.defineProperty(slate,key,{
                 enumerable: true,
                 writable: true,
-                value: interceptor.bind(slate,key,base[key],tableName)
+                value: Interceptor.bind(slate,key,base[key],tableName)
             });
         }
         // this is not to be intercepted
-        else {
+        else if (typeof base[key] === 'function' && key !== '$r') {
+
             Object.defineProperty(slate,key,{
                 enumerable: true,
+                writable: true,
                 value: base[key].bind(slate)
+            });
+        }
+        else {
+
+            Object.defineProperty(slate,key,{
+                enumerable: true,
+                writable: true,
+                value: base[key]
             });
         }
     }
@@ -53,13 +65,13 @@ const modelcreate = function (base, tableName, source, indexes={}) {
             continue;
         }
 
-        const intercepted = interceptor.bind(slate,key,source[key],tableName);
+        const intercepted = Interceptor.bind(slate,key,source[key],tableName);
         Object.defineProperty(slate,key,{
             enumerable: true,
             value: intercepted
         });
     }
-    
+
     try {
 
         if (knownTables.has(tableName)) {
@@ -68,13 +80,14 @@ const modelcreate = function (base, tableName, source, indexes={}) {
 
         return base.conn.then( (c) => {
 
-            return Promise.all([c, ensuretable(c)(tableName)]);
+            return Promise.all([c, Ensuretable(c)(tableName)]);
         }).then( (results) => {
 
             const c = results[0];
-            const _ensureindex = ensureindex(c,tableName);
+            const _ensureindex = Ensureindex(c,tableName);
 
             const promises = Object.getOwnPropertyNames(indexes).map( (name) => {
+
                 return _ensureindex(name,indexes[name]);
             });
 
@@ -84,7 +97,8 @@ const modelcreate = function (base, tableName, source, indexes={}) {
             knownTables.add(tableName);
             return Promise.resolve(slate);
         });
-    } catch (err) {
+    }
+    catch (err) {
 
         return Promise.reject(err);
     }

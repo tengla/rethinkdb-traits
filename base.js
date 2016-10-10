@@ -1,17 +1,19 @@
+'use strict';
 
-const r = require('rethinkdb');
+const $r = require('rethinkdb');
 
-// Note: props that that are enumerable will be wrapped 
-// and monkey patched. rql(rethinkdb query object) and 
+// Note: props that that are enumerable will be
+// monkey patched. rql(rethinkdb query object) and
 // parameters will be injected.
 module.exports = function (config) {
 
     const base = Object.create(Object.prototype, {
 
         connect: {
-            value: function (config) {
+            value: function (_config) {
 
-                return this.conn = r.connect(config);
+                this.conn = $r.connect(_config);
+                return this.conn;
             }
         },
 
@@ -25,17 +27,26 @@ module.exports = function (config) {
                 }
 
                 return this.conn.then( (c) => {
+
                     return c.close().then( () => {
 
-                        return this.conn = undefined;
+                        this.conn = undefined;
+                        return undefined;
                     });
-                })
+                });
             }
         },
-
+        // You going to need access to r in many cases
+        // To use it inside a trait:
+        // ie. this.$r.point(-1, 2)
+        $r: {
+            value: $r
+        },
         conn: {
             set: function (conn) {
-                return this[Symbol.for('conn')] = conn;
+
+                this[Symbol.for('conn')] = conn;
+                return this[Symbol.for('conn')];
             },
             get: function () {
 
@@ -49,18 +60,19 @@ module.exports = function (config) {
         all: {
             enumerable: true,
             value: function (rql) {
+
                 return rql.coerceTo('array');
             }
         },
 
         create: {
             enumerable: true,
-            value: function (rql,object,options={}){
+            value: function (rql,object,options = {}){
 
                 return rql.insert(object,options);
             }
         },
-        
+
         find: {
             enumerable: true,
             value: function (rql,filter) {
@@ -70,17 +82,18 @@ module.exports = function (config) {
         },
         update: {
             enumerable: true,
-            value: function (rql,id,object) {
+            value: function (rql,id,object,options = { returnChanges: true }) {
 
-                return rql.get(id).update(object);
+                return rql.get(id).update(object,options);
             }
         },
 
         delete: {
             value: function (rql) {
+
                 return this.conn.then( (c) => {
 
-                    return r.table(this.tableName).delete().run(c);
+                    return $r.table(this.tableName).delete().run(c);
                 });
             }
         },
@@ -90,15 +103,37 @@ module.exports = function (config) {
 
                 return this.conn.then( (c) => {
 
-                    return r.table(this.tableName).get(id).run(c);
+                    return $r.table(this.tableName).get(id).run(c);
+                });
+            }
+        },
+
+        getAll: {
+            value: function (id, options) {
+
+                return this.conn.then( (c) => {
+
+                    return $r.table(this.tableName).getAll(id, options).run(c);
                 });
             }
         },
 
         nth: {
             value: function (n) {
+
                 return this.conn.then( (c) => {
-                    return r.table(this.tableName).nth(n).run(c);
+
+                    return $r.table(this.tableName).nth(n).run(c);
+                });
+            }
+        },
+
+        count: {
+            value: function () {
+
+                return this.conn.then( (c) => {
+
+                    return $r.table(this.tableName).count().run(c);
                 });
             }
         }
@@ -107,3 +142,4 @@ module.exports = function (config) {
     base.connect(config);
     return base;
 };
+

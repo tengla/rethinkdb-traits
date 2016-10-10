@@ -13,13 +13,16 @@ const padEnd = function (s,n) {
     if (p < 1) {
         return s;
     }
-    const padStr = new Array(p).fill(0).map( i => " ").join('');
+    const padStr = new Array(p).fill(0).map( (i) => {
+
+        return ' ';
+    }).join('');
     return s.concat(padStr);
 };
 
 Logger.prototype.log = function (s) {
 
-    if ( ! process.env.VERBOSITY ) {
+    if ( !process.env.VERBOSITY ) {
         return;
     }
 
@@ -34,8 +37,9 @@ let logger;
 
 module.exports = {
     singleton: function () {
+
         logger = logger || new Logger();
         return logger.log.bind(logger);
     },
-    Logger: Logger
+    Logger
 };

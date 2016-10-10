@@ -1,13 +1,29 @@
+'use strict';
 
-const modelcreate = require('./modelcreate');
-const base = require('./base');
+const Modelcreate = require('./modelcreate');
+const Base = require('./base');
+Promise = require('bluebird');
 
-module.exports = {
-    config: function (config) {
-        return base(config);
-    },
-    modelCreateFrom: function (base) {
+const _base = [];
+let idx = 0;
 
-        return modelcreate(base);
-    }
+const traits = function (config) {
+
+    _base[idx] = Base(Object.assign({}, config));
+
+    const modelcreate = Modelcreate(_base[idx]);
+
+    modelcreate.close = (function (i) {
+
+        return _base[i].close().then( (r) => {
+
+            return i;
+        });
+    }).bind(undefined,idx);
+
+    idx += 1;
+
+    return modelcreate;
 };
+
+module.exports = traits;

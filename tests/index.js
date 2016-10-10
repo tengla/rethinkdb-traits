@@ -1,84 +1,95 @@
-
-const r = require('rethinkdb');
+'use strict';
 const Lab = require('lab');
 const Code = require('code');
-const lab = exports.lab = Lab.script();
+const lab = exports.lab = Lab.script({ schedule: true });
 const it = lab.it;
 const expect = Code.expect;
-const Traits = require('../');
-
-const Base = Traits.config({
-    db: process.env.TRAITS_DB,
-    host: process.env.TRAITS_HOST,
-    user: process.env.TRAITS_USER,
-    password: process.env.TRAITS_PASSWORD
-});
-
-const modelCreate = Traits.modelCreateFrom(Base);
 
 let Rapper;
 
+const traits = require('../')({
+    db: process.env.TRAITS_DB,
+    host: process.env.TRAITS_HOST,
+    user: process.env.TRAITS_USER,
+    password: process.env.TRAITS_PASSWORD || ''
+});
+
 lab.before( (done) => {
 
-    modelCreate('_rappers', {
-        getBiggie: function (query) {
+    traits('_rappers', {
+        getBiggie: function (rql) {
 
-            return query;
+            return rql;
         },
-        create: function (query,objects,options = { returnChanges: true }) {
+        create: function (rql,objects,options = { returnChanges: true }) {
 
-            if( typeof objects.map === 'function') {
-                const _objects = objects.map( o => Object.assign({}, o, { createdAt: new Date() }) )
-                return query.insert(_objects,options);
+            if ( typeof objects.map === 'function') {
+                const _objects = objects.map( (o) => {
+
+                    return Object.assign({}, o, { createdAt: this.$r.now() });
+                });
+                return rql.insert(_objects,options);
             }
-            else {
-                const _object = Object.assign({}, objects, { createdAt: new Date() });
-                return query.insert(_object,options);
-            }
+            const _object = Object.assign({}, objects, { createdAt:this.$r.now() });
+            return rql.insert(_object,options);
+        },
+        delete: function (rql) {
+
+            return rql.delete();
         },
         before: {
             'getBiggie': [
-                function beforeGetBiggie (query) {
+                function beforeGetBiggie(rql) {
 
-                    return query.getAll('Biggie Smalls', { index: 'name' })
+                    return rql.getAll('Biggie Smalls', { index: 'name' });
                 }
             ]
         },
         after: {
             'create': [
-                function (query) {
+                function (rql) {
 
-                    return query('changes').map(function(doc) {
+                    return rql('changes').map( (doc) => {
+
                         return doc('new_val');
                     });
                 }
             ],
             'getBiggie': [
-                function afterGetBiggie (query) {
+                function afterGetBiggie(rql){
 
-                    return query.coerceTo('array');
+                    return rql.coerceTo('array');
                 }
             ]
         }
     },{
-        
         name: {},
         location: { geo: true }
     }).then( (_Rapper) => {
+
         Rapper = _Rapper;
         done();
     }).catch(done);
 });
 
 lab.afterEach( (done) => {
-    
+
     Rapper.delete().then( (res) => {
 
         done();
     }).catch(done);
 });
 
-lab.experiment('Traits', () => {
+lab.after( (done) => {
+
+    traits.close().then( (idx) => {
+
+        done.note(`Goodbye ${idx}!`);
+        done();
+    });
+});
+
+lab.experiment('index', () => {
 
     it('should create 3 rappers', (done) => {
 
@@ -87,7 +98,8 @@ lab.experiment('Traits', () => {
         },{
             name: 'Tupac'
         },{
-            name: 'Grand Master Flash'
+            name: 'Grand Master Flash',
+            createdAt: Rapper.$r.now()
         }]).then( (result) => {
 
             expect(result.length).to.equal(3);
@@ -118,12 +130,31 @@ lab.experiment('Traits', () => {
 
         Rapper.create({
             name: 'Biggie Smalls',
-            location: r.point(0,0)
+            location: Rapper.$r.point(-76.289063,39.563353)
         }).then( (rappers) => {
 
-            const [ rapper ] = rappers;
+            const [rapper] = rappers;
+            expect(rapper.location.coordinates[0]).to.equal(-76.289063);
+            expect(rapper.location.coordinates[1]).to.equal(39.563353);
             expect(rapper.createdAt).to.be.date();
             done();
         });
-    })
+    });
+
+    it('should delete', (done) => {
+
+        Rapper.create({
+            name: 'Tobo'
+        }).then((rappers) => {
+
+            return Rapper.delete();
+        }).then( (res) => {
+
+            Rapper.count().then( (n) => {
+
+                expect(n).to.equal(0);
+                done();
+            });
+        }).catch(done);
+    });
 });

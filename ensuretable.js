@@ -1,22 +1,23 @@
+'use strict';
 
-const r = require('rethinkdb');
+const $r = require('rethinkdb');
 Promise = require('bluebird');
 const log = require('./logger').singleton();
 
-const ensureTable = conn => tableName => {
+const ensureTable = (conn) => (tableName) => {
 
-    return r.tableList().run(conn)
+    return $r.tableList().run(conn)
     .then( (list) => {
 
-        if ( ! list.includes(tableName) ) {
-
+        if ( !list.includes(tableName) ) {
             log(`Creating table '${tableName}'`);
-            return r.tableCreate(tableName).run(conn).then( result => result );
-        } else {
+            return $r.tableCreate(tableName).run(conn).then( (result) => {
 
-            log(`Table '${tableName}' exists`);
-            return Promise.resolve(`${tableName} already exists`);
+                return result;
+            });
         }
+        log(`Table '${tableName}' exists`);
+        return Promise.resolve(`${tableName} already exists`);
     });
 };
 

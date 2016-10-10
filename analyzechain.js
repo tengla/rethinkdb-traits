@@ -1,14 +1,16 @@
+'use strict';
 
 module.exports = function (chain) {
 
     const map = {};
     const propNames = Object.getOwnPropertyNames(chain);
 
-    for (let propName of propNames) {
-        propName.split(',').forEach( function (key) {
+    for (const propName of propNames) {
+        propName.split(',').forEach( (key) => {
+
             key = key.trim();
             map[key] = Array.prototype.concat.call(
-                map[key] || [], 
+                map[key] || [],
                 chain[propName]
             );
         });
