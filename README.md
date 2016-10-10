@@ -13,18 +13,14 @@ npm i -S athlite/rethinkdb-traits
 
 ```javascript
 
-const r = require('rethinkdb');
-const Traits = require('rethinkdb-traits');
-
-// Connect
-const Base = Traits.config({
+const config = {
     db: 'test',
     user: 'test',
     password: ''
-});
+};
 
-// Traits.modelCreateFrom is a curry that returns a function for reuse.
-const modelCreate = Traits.modelCreateFrom(Base);
+// Connect, and get 'traits' function back
+const traits = require('rethinkdb-traits')(config);
 
 // traits for model 'group'
 const groupTraits = {
@@ -33,7 +29,7 @@ const groupTraits = {
         return rql.merge(function(group) {
 
             return group.merge({
-                people: r.table('people').getAll(group('id'), { index: 'groupId' });
+                people: this.$r.table('people').getAll(group('id'), { index: 'groupId' });
             });
         })
     },
@@ -47,13 +43,13 @@ const groupTraits = {
     }
 };
 
-// modelCreate returns promise, so wrap 'em up
+// 'traits' returns promise, so wrap 'em up
 const promises = [
-    modelCreate('people', {} , {
+    traits('people', {} , {
         name: {}, // index
         groupId: {} // index
     }),
-    modelCreate('groups', groupTraits)
+    traits('groups', groupTraits)
 ];
 
 // run the lot
@@ -89,7 +85,7 @@ Promise.all(promises).then( (result) => {
         return Promise.all([Person.delete(),Group.delete()]);
     }).then( () => {
 
-        Base.close();
+        traits.close();
     });
 });
 ```
@@ -130,5 +126,3 @@ Should return:
     }
 ]
 ```
-
-More examples in the [wiki](https://github.com/athlite/rethinkdb-traits/wiki)
