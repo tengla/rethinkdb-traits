@@ -4,7 +4,8 @@
   "description": "A RethinkDB query composer.",
   "main": "index.js",
   "scripts": {
-    "test": "lab -v tests"
+    "test": "lab -v tests",
+    "lint": "lab -dL tests/"
   },
   "repository": {
     "type": "git",
