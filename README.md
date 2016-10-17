@@ -5,9 +5,8 @@ This is not an ORM. It's a library to organise related queries around tables. It
 
 ## To install
 ```shell
-npm i -S athlite/rethinkdb-traits
+npm i -S rethinkdb-traits
 ```
-*currently only available from github*
 
 ## The deal
 
