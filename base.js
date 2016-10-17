@@ -87,9 +87,17 @@ module.exports = function (config) {
                 return rql.get(id).update(object,options);
             }
         },
+        deleteOne: {
+            value: function (id) {
 
+                return this.conn.then( (c) => {
+
+                    return $r.table(this.tableName).get(id).delete().run(c);
+                });
+            } 
+        },
         delete: {
-            value: function (rql) {
+            value: function () {
 
                 return this.conn.then( (c) => {
 
