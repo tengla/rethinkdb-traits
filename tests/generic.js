@@ -48,18 +48,15 @@ lab.experiment('generic', () => {
             .then( (res) => {
 
                 const id = res.generated_keys[0];
-                done.note(`rapper id: ${id}\n`);
                 return $r.table('_rappers').get(id).run(c);
             })
             .then( (rapper) => {
 
                 expect(rapper.name).to.equal('Grand Poobah');
-                done.note(`rapper name: ${rapper.name}\n`);
                 return $r.table('_rappers').delete().run(c);
             })
             .then( (res) => {
 
-                done.note(`deleted: ${res.deleted}\n`);
                 done();
             });
         });
