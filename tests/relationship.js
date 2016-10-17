@@ -31,7 +31,9 @@ const groupTraits = {
         return rql.filter(filter).map(function (group) {
 
             return group.merge({
-                people: $r.table('_people').getAll(group('id'), { index: 'groupId' }).coerceTo('array')
+                people: $r.table('_people')
+                    .getAll(group('id'), { index: 'groupId' })
+                    .coerceTo('array')
             });
         }).coerceTo('array');
     }
