@@ -1,7 +1,10 @@
 # rethinkdb-traits
-A library to compose rethinkdb queries with NodeJS
 
-This is not an ORM. It's a library to organise related queries around tables. It does not assume anything about relations, but rather let's you express relations yourself, through functions.
+A library to compose rethinkdb queries with NodeJS.
+
+This is not an ORM. It's a library to organize your queries. It does not assume anything about relations.
+
+It *does* create table on definition, and indexes as well. It makes it easier to perform queries, in a modelish way, without having a reference to the connection.
 
 ## To install
 ```shell
@@ -23,17 +26,22 @@ const traits = require('rethinkdb-traits')(config);
 
 // traits for model 'group'
 const groupTraits = {
+    byName: function (rql,name) {
+        return rql.filter({ name });
+    }, 
     withPeople: function (rql) {
 
+        const $r = this.$r;
         return rql.merge(function(group) {
 
             return group.merge({
-                people: this.$r.table('people').getAll(group('id'), { index: 'groupId' });
+                people: $r.table('people').getAll(group('id'), { index: 'groupId' });
             });
         })
     },
+    // you can chain and reuse 'before' and 'after' functions
     after: {
-        withPeople: [
+        'byName,withPeople': [
             function (rql) {
 
                 return rql.coerceTo('array');
@@ -80,7 +88,7 @@ Promise.all(promises).then( (result) => {
         return Group.withPeople();
     }).then( (groups) => {
 
-        logJson(groups);
+        console.log(groups);
         return Promise.all([Person.delete(),Group.delete()]);
     }).then( () => {
 
